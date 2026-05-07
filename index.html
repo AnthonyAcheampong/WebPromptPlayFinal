@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>PromptPlay</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="firebase.js"></script>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: #000;
+}
+
+#unity-container {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+#unity-canvas {
+    width: 100%;
+    height: 100%;
+    background: #000;
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="unity-container">
+
+<canvas id="unity-canvas"></canvas>
+
+<div id="unity-loading-bar">
+<div id="unity-logo"></div>
+
+<div id="unity-progress-bar-empty">
+<div id="unity-progress-bar-full"></div>
+</div>
+
+</div>
+
+<div id="unity-warning"></div>
+
+<div id="unity-footer">
+<div id="unity-fullscreen-button"></div>
+</div>
+
+</div>
+
+<script>
+
+var canvas = document.querySelector("#unity-canvas");
+
+function unityShowBanner(msg, type) {
+    console.warn(msg);
+}
+
+var buildUrl = "Build";
+var loaderUrl = buildUrl + "/WebRedoneFinal2.loader.js";
+
+var config = {
+    arguments: [],
+    dataUrl: buildUrl + "/WebRedoneFinal2.data",
+    frameworkUrl: buildUrl + "/WebRedoneFinal2.framework.js",
+    codeUrl: buildUrl + "/WebRedoneFinal2.wasm",
+    streamingAssetsUrl: "StreamingAssets",
+    companyName: "TonyWalkerStudios",
+    productName: "PromptPlay",
+    productVersion: "2.0",
+    showBanner: unityShowBanner,
+    matchWebGLToCanvasSize: true
+};
+
+document.querySelector("#unity-loading-bar").style.display = "block";
+
+var script = document.createElement("script");
+script.src = loaderUrl;
+
+script.onload = function () {
+
+    createUnityInstance(canvas, config, function (progress) {
+
+        document.querySelector("#unity-progress-bar-full").style.width =
+            (100 * progress) + "%";
+
+    }).then(function (unityInstance) {
+
+        document.querySelector("#unity-loading-bar").style.display = "none";
+
+        window.unityInstance = unityInstance;
+
+        document.querySelector("#unity-fullscreen-button").onclick = function () {
+            unityInstance.SetFullscreen(1);
+        };
+
+        // Initialize Firebase after Unity loads
+        if (window.PromptPlayFirebase) {
+            window.PromptPlayFirebase.initFirebase();
+        }
+
+    }).catch(function (message) {
+
+        alert(message);
+
+    });
+
+};
+
+document.body.appendChild(script);
+
+</script>
+
+</body>
+</html>
